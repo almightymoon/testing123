@@ -1,0 +1,42 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14  
+
+      - name: Install dependencies
+        run: |
+          cd server
+          npm install
+          cd ../client
+          npm install
+
+      - name: Build React app
+        run: |
+          cd client
+          npm run build
+
+      - name: Deploy to Hostinger
+        run: |
+          # Replace these with your Hostinger FTP details
+          FTP_HOST=<your-ftp-host>
+          FTP_USER=<your-ftp-username>
+          FTP_PASSWORD=<your-ftp-password>
+          
+          # Upload files to Hostinger using lftp
+          lftp -c "open -u $FTP_USER,$FTP_PASSWORD $FTP_HOST && mirror -R -e -x .gitignore -x node_modules -x build -x .env.local -x .env.development -x .env.production ../"
+
